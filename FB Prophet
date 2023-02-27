@@ -1,0 +1,25 @@
+import pandas as pd
+from fbprophet import Prophet
+
+# Load the data into a pandas dataframe
+data = pd.read_csv('my_data.csv')
+
+# Rename the columns to 'ds' and 'y' for FB Prophet
+data = data.rename(columns={'date': 'ds', 'sales': 'y', 'price': 'price', 'marketing_spend': 'marketing_spend'})
+
+# Initialize the FB Prophet model with additional regressors
+model = Prophet(changepoint_prior_scale=0.5)
+model.add_regressor('price')
+model.add_regressor('marketing_spend')
+
+# Fit the model to the data
+model.fit(data)
+
+# Make predictions for future time periods
+future = model.make_future_dataframe(periods=365)
+future['price'] = data['price']
+future['marketing_spend'] = data['marketing_spend']
+forecast = model.predict(future)
+
+# Print the forecasted values
+print(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']])
